@@ -1,0 +1,1 @@
+#Fazer o jogo da velha com a lógica do MiniMax.
