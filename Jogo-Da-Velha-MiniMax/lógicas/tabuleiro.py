@@ -67,30 +67,3 @@ def verificar_empate(tabuleiro):
             return True
 
     return False
-
-#Esse main é apenas para testar as funções do tabuleiro, não faz parte da lógica do jogo.
-if __name__ == "__main__":
-
-    tabuleiro = criar_tabuleiro()
-
-    mostrar_tabuleiro(tabuleiro)
-
-    fazer_jogada(tabuleiro, 0, "X")
-    fazer_jogada(tabuleiro, 4, "O")
-    fazer_jogada(tabuleiro, 1, "X")
-    fazer_jogada(tabuleiro, 5, "O")
-    fazer_jogada(tabuleiro, 2, "X")
-
-    mostrar_tabuleiro(tabuleiro)
-
-    print("Movimentos disponiveis:")
-    print(movimentos_disponiveis(tabuleiro))
-
-    print("X venceu?")
-    print(verificar_vitoria(tabuleiro, "X"))
-
-    print("O venceu?")
-    print(verificar_vitoria(tabuleiro, "O"))
-
-    print("Empate?")
-    print(verificar_empate(tabuleiro))
