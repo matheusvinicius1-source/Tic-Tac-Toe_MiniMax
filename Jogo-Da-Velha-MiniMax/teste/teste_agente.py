@@ -59,3 +59,40 @@ def executar_partida_simulada(agente_comeca=True):
             return "empate"
 
         turno_agente = not turno_agente
+
+import pytest
+
+def test_agente_nunca_perde_100_partidas():
+    """
+    Teste automatizado principal exigido pelos requisitos do projeto.
+    Executa 100 partidas contra jogadas aleatórias:
+    - 50 partidas onde o Agente é o primeiro a jogar (X)
+    - 50 partidas onde o Agente é o segundo a jogar (O)
+    
+    Garante que o número de derrotas seja estritamente igual a 0.
+    """
+    estatisticas = {"vitoria": 0, "empate": 0, "derrota": 0}
+    total_partidas = 100
+
+    print(f"\nIniciando teste de estresse de {total_partidas} partidas...")
+
+    for i in range(total_partidas):
+        # Alterna quem começa: metade das partidas o agente inicia
+        agente_inicia = (i % 2 == 0)
+        resultado = executar_partida_simulada(agente_comeca=agente_inicia)
+        estatisticas[resultado] += 1
+
+    print("\n--- RESULTADO DOS TESTES AUTOMATIZADOS ---")
+    print(f"Total de partidas: {total_partidas}")
+    print(f"Vitórias da IA:   {estatisticas['vitoria']}")
+    print(f"Empates:          {estatisticas['empate']}")
+    print(f"Derrotas da IA:  {estatisticas['derrota']}")
+    print("------------------------------------------")
+
+    # Requisito obrigatório do professor: O AGENTE NUNCA PODE PERDER
+    assert estatisticas["derrota"] == 0, f"O agente perdeu {estatisticas['derrota']} partida(s)! O algoritmo não está ótimo."
+
+
+if __name__ == "__main__":
+    # Permite rodar o teste diretamente pelo Python além do pytest
+    test_agente_nunca_perde_100_partidas()
