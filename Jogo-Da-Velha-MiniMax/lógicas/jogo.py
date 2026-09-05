@@ -7,7 +7,7 @@ from lógicas.tabuleiro import (
 
 from lógicas.agente import Agente
 
-from interface.interface import (
+from lógicas.interface import (
     exibir_tabuleiro_instrucoes,
     exibir_tabuleiro_atual,
     obter_jogada_humano,
@@ -17,10 +17,7 @@ from interface.interface import (
 
 def jogar():
 
-    # ==========================================
     # CONFIGURAÇÃO
-    # ==========================================
-
     simbolo_humano, simbolo_ia = menu_inicial()
 
     tabuleiro = criar_tabuleiro()
@@ -37,19 +34,13 @@ def jogar():
     turno_humano = simbolo_humano == "X"
 
 
-    # ==========================================
     # LOOP DA PARTIDA
-    # ==========================================
-
     while True:
 
         exibir_tabuleiro_atual(tabuleiro)
 
 
-        # ======================================
         # TURNO DO HUMANO
-        # ======================================
-
         if turno_humano:
 
             print(f"--- Sua vez ({simbolo_humano}) ---")
@@ -74,10 +65,7 @@ def jogar():
                 return
 
 
-        # ======================================
         # TURNO DO AGENTE
-        # ======================================
-
         else:
 
             print(f"--- Vez do Agente ({simbolo_ia}) ---")
@@ -105,10 +93,7 @@ def jogar():
                 return
 
 
-        # ======================================
         # VERIFICAR EMPATE
-        # ======================================
-
         if verificar_empate(tabuleiro):
 
             exibir_tabuleiro_atual(tabuleiro)
@@ -120,10 +105,7 @@ def jogar():
             return
 
 
-        # ======================================
         # TROCAR TURNO
-        # ======================================
-
         turno_humano = not turno_humano
 
 
