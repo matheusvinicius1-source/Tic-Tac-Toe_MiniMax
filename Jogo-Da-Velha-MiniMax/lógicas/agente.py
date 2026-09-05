@@ -1,29 +1,18 @@
-# ==========================================
-# AGENTE
-# ==========================================
+from lógicas.minimax import melhor_jogada
 
-def criar_agente(simbolo):
-    return {
-        "simbolo": simbolo
-    }
+class Agente:
+    def __init__(self, simbolo="O", adversario="X"):
+        self.simbolo = simbolo
+        self.adversario = adversario
 
+    def jogar(self, tabuleiro):
+        posicao = melhor_jogada(
+            tabuleiro,
+            jogador_agente=self.simbolo,
+            jogador_humano=self.adversario
+        )
 
-def obter_jogadas_disponiveis(tabuleiro):
-    jogadas = []
+        if posicao is not None:
+            tabuleiro[posicao] = self.simbolo
 
-    for linha in range(3):
-        for coluna in range(3):
-            if tabuleiro[linha][coluna] == " ":
-                jogadas.append((linha, coluna))
-
-    return jogadas
-
-
-def fazer_jogada(tabuleiro, jogada, simbolo):
-    linha, coluna = jogada
-
-    if tabuleiro[linha][coluna] == " ":
-        tabuleiro[linha][coluna] = simbolo
-        return True
-
-    return False
+        return posicao
