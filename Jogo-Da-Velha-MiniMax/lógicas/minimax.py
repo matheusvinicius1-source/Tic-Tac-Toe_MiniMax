@@ -1,50 +1,55 @@
-"""
-Essa parte trabalha com uma matriz 3x3, onde cada célula vale "X", "O" ou " " (vazio).
+#Implementação do algoritmo Minimax com poda Alfa-Beta
+#para o Jogo da Velha.
 
-Depende de tabuleiro.movimentos_disponiveis(tabuleiro), que já retorna
-a lista de posições livres como tuplas (linha, coluna).
-"""
+#O tabuleiro é representado por uma lista de 9 posições:
+# 0 | 1 | 2
+# ---------
+# 3 | 4 | 5
+# ---------
+# 6 | 7 | 8
 
-from typing import List, Optional, Tuple
+from typing import Optional
 
 try:
-    # Uso normal, quando importado como parte do pacote "lógicas"
     from .tabuleiro import movimentos_disponiveis
 except ImportError:
-    # Fallback para quando o arquivo é executado/importado diretamente
     from tabuleiro import movimentos_disponiveis
+
 
 VAZIO = " "
 
 
-def verificar_vencedor(tabuleiro: List[List[str]]) -> Optional[str]:
-    """
-    Verifica o estado atual do tabuleiro.
+def verificar_vencedor(tabuleiro):
+    
+    # Verifica se X ou O venceu.
+    # Retorna:
+    # "X"       -> X venceu
+    # "O"       -> O venceu
+    # "Empate"  -> tabuleiro cheio sem vencedor
+    # None      -> jogo ainda em andamento
 
-    Retorna:
-        "X" ou "O"  -> se esse jogador tiver formado uma linha vencedora
-        "Empate"    -> se o tabuleiro estiver cheio e ninguém venceu
-        None        -> se a partida ainda está em andamento
-    """
-    # Linhas
-    for i in range(3):
-        if tabuleiro[i][0] != VAZIO and tabuleiro[i][0] == tabuleiro[i][1] == tabuleiro[i][2]:
-            return tabuleiro[i][0]
+    vitorias = [
+        (0, 1, 2),
+        (3, 4, 5),
+        (6, 7, 8),
 
-    # Colunas
-    for j in range(3):
-        if tabuleiro[0][j] != VAZIO and tabuleiro[0][j] == tabuleiro[1][j] == tabuleiro[2][j]:
-            return tabuleiro[0][j]
+        (0, 3, 6),
+        (1, 4, 7),
+        (2, 5, 8),
 
-    # Diagonal principal
-    if tabuleiro[0][0] != VAZIO and tabuleiro[0][0] == tabuleiro[1][1] == tabuleiro[2][2]:
-        return tabuleiro[0][0]
+        (0, 4, 8),
+        (2, 4, 6)
+    ]
 
-    # Diagonal secundária
-    if tabuleiro[0][2] != VAZIO and tabuleiro[0][2] == tabuleiro[1][1] == tabuleiro[2][0]:
-        return tabuleiro[0][2]
+    for a, b, c in vitorias:
 
-    # Empate
+        if (
+            tabuleiro[a] != VAZIO
+            and tabuleiro[a] == tabuleiro[b]
+            and tabuleiro[a] == tabuleiro[c]
+        ):
+            return tabuleiro[a]
+
     if not movimentos_disponiveis(tabuleiro):
         return "Empate"
 
@@ -52,97 +57,144 @@ def verificar_vencedor(tabuleiro: List[List[str]]) -> Optional[str]:
 
 
 def minimax(
-    tabuleiro: List[List[str]],
-    profundidade: int,
-    alfa: float,
-    beta: float,
-    maximizando: bool,
-    jogador_agente: str = "O",
-    jogador_humano: str = "X",
-) -> int:
-    """
-    Algoritmo Minimax com poda Alfa-Beta.
+    tabuleiro,
+    profundidade,
+    alfa,
+    beta,
+    maximizando,
+    jogador_agente,
+    jogador_humano
+):
 
-    - alfa: melhor valor que o maximizador (agente) já garantiu até agora.
-    - beta: melhor valor que o minimizador (oponente) já garantiu até agora.
-    - Sempre que beta <= alfa, o ramo é podado: um jogador já tem uma opção
-      melhor em outro lugar da árvore, então não há razão para continuar
-      explorando esse ramo.
+    #Executa o algoritmo Minimax com poda Alfa-Beta. 
+    #O agente é o jogador MAX. 
+    #O humano é o jogador MIN.
+    
+    #Pontuação: 
+    #vitória do agente  -> 10 - profundidade
+    #vitória humana -> profundidade - 10
+    #empate -> 0
 
-    A pontuação usa a profundidade para preferir vitórias mais rápidas e
-    adiar derrotas o máximo possível:
-        agente vence  -> 10 - profundidade
-        humano vence  -> profundidade - 10
-        empate        -> 0
-    """
     resultado = verificar_vencedor(tabuleiro)
 
+    # Estado terminal: agente venceu
     if resultado == jogador_agente:
         return 10 - profundidade
+
+    # Estado terminal: humano venceu
     if resultado == jogador_humano:
         return profundidade - 10
+
+    # Estado terminal: empate
     if resultado == "Empate":
         return 0
 
+
+    # MAX — vez do agente
     if maximizando:
+
         melhor_valor = float("-inf")
-        for (i, j) in movimentos_disponiveis(tabuleiro):
-            tabuleiro[i][j] = jogador_agente
+
+        for posicao in movimentos_disponiveis(tabuleiro):
+
+            # Faz a jogada do agente
+            tabuleiro[posicao] = jogador_agente
+
             valor = minimax(
-                tabuleiro, profundidade + 1, alfa, beta, False,
-                jogador_agente, jogador_humano,
+                tabuleiro,
+                profundidade + 1,
+                alfa,
+                beta,
+                False,
+                jogador_agente,
+                jogador_humano
             )
-            tabuleiro[i][j] = VAZIO
+
+            # Desfaz a jogada
+            tabuleiro[posicao] = VAZIO
 
             melhor_valor = max(melhor_valor, valor)
+
+            # Atualiza Alfa
             alfa = max(alfa, melhor_valor)
+
+            # Poda Alfa-Beta
             if beta <= alfa:
-                break  # poda alfa-beta
+                break
+
         return melhor_valor
 
+
+    # MIN — vez do humano
     else:
+
         pior_valor = float("inf")
-        for (i, j) in movimentos_disponiveis(tabuleiro):
-            tabuleiro[i][j] = jogador_humano
+
+        for posicao in movimentos_disponiveis(tabuleiro):
+
+            # Faz a jogada do humano
+            tabuleiro[posicao] = jogador_humano
+
             valor = minimax(
-                tabuleiro, profundidade + 1, alfa, beta, True,
-                jogador_agente, jogador_humano,
+                tabuleiro,
+                profundidade + 1,
+                alfa,
+                beta,
+                True,
+                jogador_agente,
+                jogador_humano
             )
-            tabuleiro[i][j] = VAZIO
+
+            # Desfaz a jogada
+            tabuleiro[posicao] = VAZIO
 
             pior_valor = min(pior_valor, valor)
+
+            # Atualiza Beta
             beta = min(beta, pior_valor)
+
+            # Poda Alfa-Beta
             if beta <= alfa:
-                break  # poda alfa-beta
+                break
+
         return pior_valor
 
 
 def melhor_jogada(
-    tabuleiro: List[List[str]],
-    jogador_agente: str = "O",
-    jogador_humano: str = "X",
-) -> Optional[Tuple[int, int]]:
-    """
-    Retorna a posição (linha, coluna) considerada ótima para o agente,
-    avaliando cada movimento disponível com Minimax + poda Alfa-Beta.
-    """
+    tabuleiro,
+    jogador_agente="O",
+    jogador_humano="X"
+):
+    #Procura a melhor jogada possível para o agente e Retorna um número entre 0 e 8.
+
     melhor_valor = float("-inf")
-    melhor_pos: Optional[Tuple[int, int]] = None
+    melhor_posicao = None
+
     alfa = float("-inf")
     beta = float("inf")
 
-    for (i, j) in movimentos_disponiveis(tabuleiro):
-        tabuleiro[i][j] = jogador_agente
+    for posicao in movimentos_disponiveis(tabuleiro):
+
+        # Testa a jogada
+        tabuleiro[posicao] = jogador_agente
+
         valor = minimax(
-            tabuleiro, 0, alfa, beta, False,
-            jogador_agente, jogador_humano,
+            tabuleiro,
+            profundidade=0,
+            alfa=alfa,
+            beta=beta,
+            maximizando=False,
+            jogador_agente=jogador_agente,
+            jogador_humano=jogador_humano
         )
-        tabuleiro[i][j] = VAZIO
+
+        # Desfaz a jogada
+        tabuleiro[posicao] = VAZIO
 
         if valor > melhor_valor:
             melhor_valor = valor
-            melhor_pos = (i, j)
+            melhor_posicao = posicao
 
         alfa = max(alfa, melhor_valor)
 
-    return melhor_pos
+    return melhor_posicao
